@@ -17,7 +17,7 @@ class PhotoroomClient:
         self.api_key = api_key
         self.headers = {"x-api-key": self.api_key}
 
-    async def remove_background(self, image_bytes: bytes) -> bytes:
+    def remove_background(self, image_bytes: bytes) -> bytes:
         """Remove background from image bytes.
 
         Args:
@@ -26,11 +26,11 @@ class PhotoroomClient:
         Returns:
             The processed image with background removed as bytes
         """
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        with httpx.Client(timeout=30.0) as client:
             files = {"image_file": image_bytes}
 
-            response = await client.post(
-                f"{self.api_url}/v1/segment",
+            response = client.post(
+                f"{self.api_url}/segment",
                 headers=self.headers,
                 files=files,
             )

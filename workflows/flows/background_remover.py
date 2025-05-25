@@ -40,7 +40,7 @@ def background_removal_flow(image_url: str, api_url: str, api_key: str) -> dict:
     logger.info(f"Processing image: {image_url}")
 
     # Fetch image
-    with httpx.AsyncClient(timeout=DEFAULT_REQUEST_TIMEOUT) as client:
+    with httpx.Client(timeout=DEFAULT_REQUEST_TIMEOUT) as client:
         response = client.get(image_url)
         response.raise_for_status()
         image_bytes = response.content

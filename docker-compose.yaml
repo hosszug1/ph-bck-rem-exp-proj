@@ -12,6 +12,8 @@ services:
       - "4200:4200"
     networks:
       - prefect-network
+    volumes:
+      - prefect_data:/data
 
   # Prefect worker for processing tasks
   prefect-worker:
@@ -64,9 +66,9 @@ services:
     environment:
       # Override some env vars specific to the docker environment
       PREFECT_API_URL: http://prefect-server:4200/api
-    # depends_on:
-    #   - prefect-server
-    #   - minio
+    depends_on:
+      - prefect-server
+      - minio
     volumes:
       - .:/app
     networks:
