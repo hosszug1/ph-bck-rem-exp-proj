@@ -15,7 +15,7 @@ MINIO_BUCKET_NAME = "processed-images"
 MINIO_PUBLIC_URL_FORMAT = "{endpoint}/{bucket}/{key}"
 DEFAULT_IMAGE_FORMAT = "png"
 DEFAULT_CONTENT_TYPE = "image/png"
-MINIO_ENDPOINT = "http://localhost:9000"
+MINIO_ENDPOINT = "http://minio:9000"
 MINIO_ACCESS_KEY = "minioadmin"
 MINIO_SECRET_KEY = "minioadmin"  # noqa: S105
 

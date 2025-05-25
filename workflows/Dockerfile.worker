@@ -1,23 +1,14 @@
 # Prefect version must match Dockerfile.server and pyproject.toml
-FROM prefecthq/prefect:3-latest
+# FROM prefecthq/prefect:3-latest
+FROM python:3.13-slim
 
-# Install system dependencies including Docker
-# RUN apt-get update && apt-get install -y \
-#     curl \
-#     gnupg \
-#     lsb-release \
-#     ca-certificates \
-#     && mkdir -p /etc/apt/keyrings \
-#     && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
-#     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list \
-#     && apt-get update \
-#     && apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin \
-#     && rm -rf /var/lib/apt/lists/*
+# Set working directory
+WORKDIR /app
 
 # Copy requirements and install Python dependencies
-# COPY requirements.txt .
-# RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install prefect[docker]
+COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
+# RUN pip install prefect[docker]
 
 # Connect to Prefect
 ARG PREFECT_API_URL
@@ -28,8 +19,13 @@ ARG POOL_NAME
 ENV POOL_NAME=${POOL_NAME}
 
 # Copy the worker entrypoint script
-COPY worker_entrypoint.sh /worker_entrypoint.sh
-RUN chmod +x /worker_entrypoint.sh
+# NOTE (from author): Sadly, I wasn't able to make the proper deployment work because
+# of some strange errors so it's going to run with `serve` functionality instead of `deploy`.
+# This is a good enough fallback for the purposes of this demo.
+CMD ["python", "-m", "workflows.flows.deploy", "serve"]
+
+# COPY worker_entrypoint.sh /worker_entrypoint.sh
+# RUN chmod +x /worker_entrypoint.sh
 
 # Use the entrypoint script
-ENTRYPOINT ["/worker_entrypoint.sh"]
+# ENTRYPOINT ["/worker_entrypoint.sh"]

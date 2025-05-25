@@ -44,13 +44,23 @@ def deploy(
     image: str,
     push: bool = False,
 ) -> None:
-    """Deploy a Prefect flow."""
+    """Deploy a Prefect flow.
+
+    NOTE: Please don't use as not fully working at the moment.
+    """
     background_removal_flow.deploy(
         name=name,
         work_pool_name=work_pool_name,
         image=DockerImage(name=image, dockerfile=FLOW_DOCKERFILE),
+        # image=image,
         push=push,
     )
+
+
+@cli.command()
+def serve() -> None:
+    """Serve the Prefect flow."""
+    background_removal_flow.serve(name=BACKGROUND_REMOVAL_DEPLOYMENT)
 
 
 if __name__ == "__main__":

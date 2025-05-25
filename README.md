@@ -115,7 +115,7 @@ Assuming you have already started all docker images with `docker compose`:
 
 ```bash
 # Create a deployment for the background remover flow
-python -m workflows.flows.deploy deploy --name "test-image"
+python -m workflows.flows.deploy serve
 
 # Access Prefect UI at http://localhost:4200
 # Access MinIO Console at http://localhost:9001 (login: minioadmin/minioadmin)

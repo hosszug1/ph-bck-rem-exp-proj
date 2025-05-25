@@ -1,6 +1,0 @@
-# Prefect version must match Dockerfile.server and pyproject.toml
-FROM python:3.13-slim
-
-# Copy requirements and install Python dependencies
-COPY workflows/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
