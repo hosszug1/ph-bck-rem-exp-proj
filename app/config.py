@@ -8,9 +8,6 @@ from app.constants import (
     ENV_PHOTOROOM_API_URL,
 )
 
-# Constants
-ENV_VAR_NOT_SET_ERROR = "Required environment variable {} is not set"
-
 
 class Settings:
     """Application settings loaded from environment variables."""
@@ -37,7 +34,7 @@ class Settings:
         """
         value = os.getenv(key, default)
         if not value:
-            raise ValueError("Required environment variable {} is not set")
+            raise ValueError(f"Required environment variable {key} is not set")
         return value
 
 

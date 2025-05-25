@@ -78,12 +78,9 @@ async def remove_backgrounds_batch(
     # Process all images in parallel
     async def process_image_for_batch(url: str) -> tuple[str, bytes | None]:
         """Process image and return URL and processed bytes."""
-        try:
-            image_bytes = await fetch_image(url)
-            processed_image = await photoroom_client.remove_background(image_bytes)
-            return url, processed_image
-        except Exception:
-            return url, None
+        image_bytes = await fetch_image(url)
+        processed_image = await photoroom_client.remove_background(image_bytes)
+        return url, processed_image
 
     tasks = [process_image_for_batch(str(url)) for url in request.image_urls]
     results = await asyncio.gather(*tasks)

@@ -3,8 +3,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from prefect import get_client
-from prefect.deployments import run_deployment
 
 from app.clients.photoroom import PhotoroomClient
 from app.constants import (
@@ -16,6 +14,8 @@ from app.constants import (
 from app.dependencies import get_photoroom_client
 from app.helpers.image import create_zip_archive
 from app.models.background_remover import BatchImageRequest
+from prefect import get_client
+from prefect.deployments import run_deployment
 
 router = APIRouter(prefix="/api/v1/prefect", tags=["prefect-background-removal"])
 

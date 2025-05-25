@@ -23,14 +23,14 @@ background-remover/
 │   └── routers/
 │       └── background_remover.py  # API endpoints
 ├── tests/                   # Test directory (pytest ready)
-├── pyproject.toml          # Project configuration
+├── pyproject.toml           # Project configuration
 └── README.md
 ```
 
 ## 🚀 Setup
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.12+
 - `uv` package manager ([install here](https://github.com/astral-sh/uv))
 
 ### Installation
@@ -44,7 +44,7 @@ background-remover/
    ```bash
    uv venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   uv pip install -e .
+   uv sync
    ```
 
 3. **Set up environment variables:**
@@ -157,7 +157,7 @@ This project uses several development tools to maintain code quality:
 
 Install all development dependencies:
 ```bash
-uv pip install -e ".[dev]"
+uv sync --all-extras
 ```
 
 ### Using Invoke for Development Tasks
