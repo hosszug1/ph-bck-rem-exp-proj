@@ -8,6 +8,7 @@ DEFAULT_RETRY_DELAY = 2
 BACKGROUND_REMOVAL_FLOW = "background-removal"
 BACKGROUND_REMOVAL_DEPLOYMENT = "background-removal-deployment"
 DEFAULT_WORKER_POOL = "test-pool"
+FLOW_DOCKERFILE = "workflows/Dockerfile.flows"
 
 # MinIO Constants
 MINIO_BUCKET_NAME = "processed-images"

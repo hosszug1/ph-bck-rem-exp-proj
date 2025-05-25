@@ -40,4 +40,4 @@ fi
 
 # Start the worker and connect to the pool
 echo "Starting worker and connecting to pool '${POOL_NAME}'..."
-prefect worker start --pool "${POOL_NAME}"
+prefect worker start --pool "${POOL_NAME} --install-policy"
