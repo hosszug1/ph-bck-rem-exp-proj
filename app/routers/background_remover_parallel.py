@@ -65,7 +65,7 @@ async def start_batch_processing(
                 "api_url": api_url,
                 "api_key": api_key,
             },
-            timeout=0, # Don't wait for completion
+            timeout=0,  # Don't wait for completion
         )
         flow_ids.append(str(flow_run.id))
 
@@ -96,7 +96,7 @@ async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
             detail="At least one flow ID is required",
         )
 
-    results = []
+    results = {}  # Changed from list to dictionary
     success_count = 0
     total_count = len(flow_ids)
 
@@ -110,15 +110,13 @@ async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
                 # Get flow run details
                 flow_run = await client.read_flow_run(flow_uuid)
 
-                # Flow still running or failed.
-                results.append(
-                    ProcessingResult(
-                        url=flow_id,
-                        success=False,
-                        error=None,
-                        storage_url=None,
-                        original_url=None,
-                    )
+                # Default to not completed state
+                results[flow_id] = ProcessingResult(
+                    url=flow_id,
+                    success=False,
+                    error=None,
+                    storage_url=None,
+                    original_url=None,
                 )
 
                 # Check if flow is completed
@@ -127,25 +125,21 @@ async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
                     result_data = await flow_run.state.result()
                     # Flow completed successfully
                     success_count += 1
-                    results.append(
-                        ProcessingResult(
-                            url=flow_id,
-                            success=True,
-                            error=result_data.get("error"),
-                            storage_url=result_data.get("url"),
-                            original_url=result_data.get("original_url", "unknown"),
-                        )
+                    results[flow_id] = ProcessingResult(
+                        url=flow_id,
+                        success=True,
+                        error=result_data.get("error"),
+                        storage_url=result_data.get("url"),
+                        original_url=result_data.get("original_url", "unknown"),
                     )
             except Exception as e:
                 # Error getting flow
-                results.append(
-                    ProcessingResult(
-                        url=flow_id,
-                        success=False,
-                        error=f"Error checking flow: {str(e)}",
-                        storage_url=None,
-                        original_url="unknown",
-                    )
+                results[flow_id] = ProcessingResult(
+                    url=flow_id,
+                    success=False,
+                    error=f"Error checking flow: {str(e)}",
+                    storage_url=None,
+                    original_url="unknown",
                 )
 
     # Return response with all results

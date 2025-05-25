@@ -30,4 +30,4 @@ class BatchImageResponse(BaseModel):
 
     total_count: int
     success_count: int
-    results: list[ProcessingResult]
+    results: dict[str, ProcessingResult]
