@@ -20,10 +20,10 @@ from app.models.background_remover import (
     ProcessingResult,
 )
 
-router = APIRouter(prefix="/api/v2/prefect", tags=["prefect-background-removal"])
+router = APIRouter(prefix="/api/v2", tags=["prefect-background-removal"])
 
 
-@router.post("/process")
+@router.post("/remove-backgrounds")
 async def start_batch_processing(
     request: BatchImageRequest,
     photoroom_client: PhotoroomClient = Depends(get_photoroom_client),
@@ -59,13 +59,13 @@ async def start_batch_processing(
     flow_ids = []
     for url in request.image_urls:
         flow_run = await run_deployment(
-            name=f"{BACKGROUND_REMOVAL_DEPLOYMENT}/{BACKGROUND_REMOVAL_FLOW}",
+            name=f"{BACKGROUND_REMOVAL_FLOW}/{BACKGROUND_REMOVAL_DEPLOYMENT}",
             parameters={
                 "image_url": str(url),
                 "api_url": api_url,
                 "api_key": api_key,
             },
-            flow_run_name=f"process-image-{url.split('/')[-1]}",
+            timeout=0, # Don't wait for completion
         )
         flow_ids.append(str(flow_run.id))
 
@@ -77,7 +77,7 @@ async def start_batch_processing(
     }
 
 
-@router.post("/results")
+@router.post("/remove-backgrounds/results")
 async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
     """Get results for multiple flows.
 

@@ -1,0 +1,35 @@
+# Prefect version must match Dockerfile.server and pyproject.toml
+FROM prefecthq/prefect:3-latest
+
+# Install system dependencies including Docker
+# RUN apt-get update && apt-get install -y \
+#     curl \
+#     gnupg \
+#     lsb-release \
+#     ca-certificates \
+#     && mkdir -p /etc/apt/keyrings \
+#     && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+#     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list \
+#     && apt-get update \
+#     && apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin \
+#     && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install prefect[docker]
+
+# Connect to Prefect
+ARG PREFECT_API_URL
+ENV PREFECT_API_URL=${PREFECT_API_URL}
+
+# Allow to config pool_name
+ARG POOL_NAME
+ENV POOL_NAME=${POOL_NAME}
+
+# Copy the worker entrypoint script
+COPY worker_entrypoint.sh /worker_entrypoint.sh
+RUN chmod +x /worker_entrypoint.sh
+
+# Use the entrypoint script
+ENTRYPOINT ["/worker_entrypoint.sh"]

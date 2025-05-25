@@ -7,6 +7,7 @@ DEFAULT_RETRY_DELAY = 2
 # Prefect Client Constants
 BACKGROUND_REMOVAL_FLOW = "background-removal"
 BACKGROUND_REMOVAL_DEPLOYMENT = "background-removal-deployment"
+DEFAULT_WORKER_POOL = "test-pool"
 
 # MinIO Constants
 MINIO_BUCKET_NAME = "processed-images"

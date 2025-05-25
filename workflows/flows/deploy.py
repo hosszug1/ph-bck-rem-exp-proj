@@ -1,27 +1,51 @@
 """Deployment script for Prefect flows."""
 
-import asyncio
+import click
 
-from prefect import serve
-
-from workflows.constants import BACKGROUND_REMOVAL_DEPLOYMENT, BACKGROUND_REMOVAL_FLOW
+# from prefect import aserve
+from workflows.constants import BACKGROUND_REMOVAL_DEPLOYMENT, DEFAULT_WORKER_POOL
 from workflows.flows.background_remover import background_removal_flow
 
 
-async def deploy_flows() -> None:
-    """Deploy flows for serving."""
+@click.group()
+def cli() -> None:
+    """CLI for managing Prefect flows."""
+    pass
 
-    # Create deployment for background removal flow
-    deployment = await background_removal_flow.to_deployment(
-        name=f"{BACKGROUND_REMOVAL_DEPLOYMENT}/{BACKGROUND_REMOVAL_FLOW}",
-        description="Background removal flow for parallel image processing",
-        tags=["background-removal", "batch", "parallel"],
-        version="1.0.0",
+
+@cli.command()
+@click.option(
+    "--name",
+    default=BACKGROUND_REMOVAL_DEPLOYMENT,
+    show_default=True,
+    help="Name of the deployment.",
+)
+@click.option(
+    "--work-pool-name", default=DEFAULT_WORKER_POOL, help="Name of the work pool."
+)
+@click.option(
+    "--image",
+    default=None,
+    help="Docker image to use for the deployment (only for docker pool type).",
+)
+@click.option(
+    "--push",
+    is_flag=True,
+    help="Whether to push the Docker image (only for docker pool type).",
+)
+def deploy(
+    name: str,
+    work_pool_name: str,
+    image: str | None,
+    push: bool = False,
+) -> None:
+    """Deploy a Prefect flow."""
+    background_removal_flow.deploy(
+        name=name,
+        work_pool_name=work_pool_name,
+        image=image,
+        push=push,
     )
 
-    # Serve the deployment (easiest way to run both the worker and the code itself).
-    await serve(deployment)
-
-
 if __name__ == "__main__":
-    asyncio.run(deploy_flows())
+    cli()

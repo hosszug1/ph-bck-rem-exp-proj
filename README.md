@@ -67,13 +67,15 @@ background-remover/
 4. **Start the service with Docker Compose:**
    ```bash
    uv export > app/requirements.txt
-   docker-compose up -d
+   uv export > workflows/requirements.txt
+   docker compose up -d --build
    ```
 
 This will start:
 - The FastAPI application on port 8000
 - The Prefect server UI on port 4200
 - MinIO server on port 9000 with its console on port 9001
+- A prefect worker to execute flows
 
 The service will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`.
 The MinIO console will be available at `http://localhost:9001` (login with minioadmin/minioadmin).
@@ -90,8 +92,8 @@ The MinIO console will be available at `http://localhost:9001` (login with minio
 
 ### Experimental: Prefect-based Parallel Processing with S3 Storage
 
-- **POST** `/api/v1/prefect/process` - Start async batch processing with Prefect
-- **POST** `/api/v1/prefect/results` - Get processing results, including partial results
+- **POST** `/api/v2/remove-backgrounds` - Start async batch processing with Prefect
+- **POST** `/api/v2/remove-backgrounds/results` - Get processing results, including partial results
 
 This implementation uses [Prefect 3.x](https://www.prefect.io/) for workflow orchestration and parallel task execution, 
 and MinIO as an S3-compatible storage solution. The architecture:
@@ -108,16 +110,41 @@ and MinIO as an S3-compatible storage solution. The architecture:
 - **Partial Results**: The API returns partial results if some flows are still running
 
 **To use this feature:**
+
+Assuming you have already started all docker images with `docker compose`:
+
 ```bash
-# Start all services with Docker Compose
-docker-compose up -d
+# Create a deployment for the background remover flow
+python -m workflows.flows.deploy deploy --name "test-image"
 
 # Access Prefect UI at http://localhost:4200
 # Access MinIO Console at http://localhost:9001 (login: minioadmin/minioadmin)
 # API endpoints available at /api/v1/prefect/*
 ```
 
-See `workflows/README.md` for more details on the intended architecture.
+## 🔄 Prefect Workflows
+
+The application uses Prefect for workflow orchestration. Here's how to work with the Prefect components:
+
+### Monitoring and Managing Flows
+
+1. **Access the Prefect UI:**
+   - Open your browser and navigate to http://localhost:4200
+   - Here you can monitor flow runs, view logs, and manage deployments
+
+2. **Understanding the components:**
+   - **Prefect Server**: Manages flow orchestration and provides the UI
+   - **Worker Pool**: A group of workers that can execute flows
+   - **Worker**: Executes flows from the assigned worker pool
+   - **Deployment**: A registered flow that can be triggered via API or UI
+
+3. **Triggering flows manually:**
+   - Through the Prefect UI: Navigate to Deployments and click "Run"
+   - Through the API: Use the FastAPI endpoints at `/api/v1/prefect/*`
+
+4. **Viewing results:**
+   - Flow results are stored in MinIO and can be accessed via the URLs returned by the API
+   - The Prefect UI provides detailed logs and execution history
 
 ## 🔧 Usage Examples
 
@@ -222,19 +249,5 @@ invoke run-lint
 invoke run-tests
 
 # Generate requirements.txt from uv.lock
-invoke gen-reqs
-```
-
-### Manual Tool Usage
-
-If you prefer to run tools manually:
-
-```bash
-# Linting and formatting with ruff
-ruff check .
-ruff format .
-
-# Running tests with pytest
-pytest
-pytest --cov=app  # With coverage
+invoke gen-all-reqs
 ```

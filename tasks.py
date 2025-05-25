@@ -23,7 +23,7 @@ def run_tests(ctx: Context) -> None:
 
 @task
 def gen_app_reqs(ctx: Context) -> None:
-    """Generate requirements.txt from uv.lock file."""
+    """Generate requirements.txt for the fastapi app from uv.lock file."""
     ctx.run("uv export > app/requirements.txt")
 
 
@@ -31,6 +31,7 @@ def gen_app_reqs(ctx: Context) -> None:
 def gen_workflows_reqs(ctx: Context) -> None:
     """Generate requirements.txt for workflows from uv.lock file."""
     ctx.run("uv export > workflows/requirements.txt")
+
 
 @task
 def gen_all_reqs(ctx: Context) -> None:

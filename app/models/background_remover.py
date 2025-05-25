@@ -22,7 +22,7 @@ class ProcessingResult(BaseModel):
     success: bool
     error: str | None = None
     storage_url: str | None = None
-    original_url: str
+    original_url: str | None = None
 
 
 class BatchImageResponse(BaseModel):

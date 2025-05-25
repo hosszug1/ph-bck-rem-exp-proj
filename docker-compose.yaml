@@ -3,10 +3,36 @@ services:
   prefect-server:
     image: prefecthq/prefect:3-latest
     command: prefect server start --host 0.0.0.0
+    environment:
+      # For internal service communication
+      PREFECT_API_URL: http://prefect-server:4200/api
+      # For browser UI access
+      PREFECT_UI_API_URL: http://localhost:4200/api
     ports:
       - "4200:4200"
+    networks:
+      - prefect-network
+
+  # Prefect worker for processing tasks
+  prefect-worker:
+    build:
+      context: ./workflows
+      dockerfile: Dockerfile.worker
+      args:
+        PREFECT_API_URL: http://prefect-server:4200/api
+        POOL_NAME: test-pool
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+    env_file:
+      - .env
+    depends_on:
+      - prefect-server
+      - minio
     volumes:
-      - prefect_data:/root/.prefect
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - prefect-network
 
   # MinIO for object storage (S3 compatible)
   minio:
@@ -25,6 +51,8 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - prefect-network
 
   # FastAPI application
   fastapi-app:
@@ -36,25 +64,18 @@ services:
     environment:
       # Override some env vars specific to the docker environment
       PREFECT_API_URL: http://prefect-server:4200/api
-    depends_on:
-      - prefect-server
-      - minio
+    # depends_on:
+    #   - prefect-server
+    #   - minio
     volumes:
       - .:/app
-
-  # Prefect worker for running flows
-  prefect-worker:
-    build: ./workflows
-    env_file:
-      - .env
-    environment:
-      # Override some env vars specific to the docker environment
-      PREFECT_API_URL: http://prefect-server:4200/api
-    depends_on:
-      - prefect-server
-    volumes:
-      - .:/app
+    networks:
+      - prefect-network
 
 volumes:
   prefect_data:
   minio_data:
+
+networks:
+  prefect-network:
+    driver: bridge
