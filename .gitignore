@@ -63,3 +63,6 @@ test_output.png
 result.png
 batch_result.png
 no_bg.png
+
+# Generated files
+requirements.txt

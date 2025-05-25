@@ -66,6 +66,7 @@ background-remover/
 
 4. **Start the service with Docker Compose:**
    ```bash
+   uv export > app/requirements.txt
    docker-compose up -d
    ```
 
@@ -219,6 +220,9 @@ invoke run-lint
 
 # Run pytests
 invoke run-tests
+
+# Generate requirements.txt from uv.lock
+invoke gen-reqs
 ```
 
 ### Manual Tool Usage

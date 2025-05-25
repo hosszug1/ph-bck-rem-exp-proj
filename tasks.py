@@ -19,3 +19,9 @@ def run_tests(ctx: Context) -> None:
     """Run all tests with coverage."""
 
     ctx.run("pytest .")
+
+
+@task
+def gen_reqs(ctx: Context) -> None:
+    """Generate requirements.txt from uv.lock file."""
+    ctx.run("uv export > app/requirements.txt")

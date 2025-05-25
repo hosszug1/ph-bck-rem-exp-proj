@@ -7,14 +7,12 @@ from urllib.parse import urlparse
 import httpx
 from fastapi import HTTPException, status
 
-from app.clients.photoroom import PhotoroomClient
 from app.constants import (
     DEFAULT_IMAGE_NAME,
     DEFAULT_TIMEOUT,
     PNG_EXTENSION,
     SAFE_FILENAME_CHARS,
 )
-from app.models.background_remover import ImageResponse
 
 
 async def fetch_image(url: str) -> bytes:
@@ -42,38 +40,6 @@ async def fetch_image(url: str) -> bytes:
             )
 
         return response.content
-
-
-async def process_single_image(
-    url: str, photoroom_client: PhotoroomClient
-) -> ImageResponse:
-    """Process a single image URL for background removal.
-
-    Args:
-        url: The image URL to process
-        photoroom_client: PhotoroomClient instance
-
-    Returns:
-        ImageResponse with the result
-    """
-    try:
-        # Fetch image
-        image_bytes = await fetch_image(url)
-
-        # Remove background
-        await photoroom_client.remove_background(image_bytes)
-
-        return ImageResponse(
-            success=True, message="Background removed successfully", original_url=url
-        )
-
-    except Exception as e:
-        return ImageResponse(
-            success=False,
-            message="Failed to process image",
-            original_url=url,
-            error=str(e),
-        )
 
 
 def create_zip_archive(processed_images: list[tuple[str, bytes]]) -> bytes:
