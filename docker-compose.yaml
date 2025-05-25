@@ -15,6 +15,7 @@ services:
       - prefect-network
     volumes:
       - prefect_data:/data
+      - /tmp/prefect-results:/tmp/prefect-results
 
   # Prefect worker for processing tasks
   prefect-worker:
@@ -71,6 +72,8 @@ services:
       - minio
     networks:
       - prefect-network
+    volumes:
+      - /tmp/prefect-results:/tmp/prefect-results
 
 volumes:
   prefect_data:

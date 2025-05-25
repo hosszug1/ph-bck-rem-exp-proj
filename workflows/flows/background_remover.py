@@ -64,16 +64,16 @@ def background_removal_flow(image_url: str, api_url: str, api_key: str) -> dict:
     )
 
     # Upload the processed image to MinIO
-    storage_url = minio_client.upload_image(
+    processed_url = minio_client.upload_image(
         processed_image,
         filename=filename,
         bucket_name=MINIO_BUCKET_NAME,
     )
 
-    logger.info(f"Successfully processed and uploaded: {storage_url}")
+    logger.info(f"Successfully processed and uploaded: {processed_url}")
 
     return {
-        "url": storage_url,
+        "url": processed_url,
         "original_url": image_url,
         "success": True,
         "error": None,

@@ -115,7 +115,7 @@ async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
                     url=flow_id,
                     success=False,
                     error=None,
-                    storage_url=None,
+                    processed_url=None,
                     original_url=None,
                 )
 
@@ -129,7 +129,7 @@ async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
                         url=flow_id,
                         success=True,
                         error=result_data.get("error"),
-                        storage_url=result_data.get("url"),
+                        processed_url=result_data.get("url"),
                         original_url=result_data.get("original_url", "unknown"),
                     )
             except Exception as e:
@@ -138,7 +138,7 @@ async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
                     url=flow_id,
                     success=False,
                     error=f"Error checking flow: {str(e)}",
-                    storage_url=None,
+                    processed_url=None,
                     original_url="unknown",
                 )
 

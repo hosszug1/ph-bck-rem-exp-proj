@@ -21,7 +21,7 @@ class ProcessingResult(BaseModel):
     url: str
     success: bool
     error: str | None = None
-    storage_url: str | None = None
+    processed_url: str | None = None
     original_url: str | None = None
 
 
