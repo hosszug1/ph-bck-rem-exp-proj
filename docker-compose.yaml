@@ -8,6 +8,7 @@ services:
       PREFECT_API_URL: http://prefect-server:4200/api
       # For browser UI access
       PREFECT_UI_API_URL: http://localhost:4200/api
+      PREFECT_RESULTS_PERSIST_BY_DEFAULT: true
     ports:
       - "4200:4200"
     networks:
@@ -18,7 +19,7 @@ services:
   # Prefect worker for processing tasks
   prefect-worker:
     build:
-      context: ./workflows
+      context: .
       dockerfile: Dockerfile.worker
       args:
         PREFECT_API_URL: http://prefect-server:4200/api
@@ -26,14 +27,14 @@ services:
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
       MINIO_ENDPOINT: http://minio:9000
-    env_file:
-      - .env
+      PREFECT_RESULTS_PERSIST_BY_DEFAULT: true
+      PREFECT_LOCAL_STORAGE_PATH: /tmp/prefect-results
     depends_on:
       - prefect-server
       - minio
     volumes:
-      - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/prefect-results:/tmp/prefect-results
     networks:
       - prefect-network
 
@@ -49,17 +50,14 @@ services:
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
     networks:
       - prefect-network
 
   # FastAPI application
   fastapi-app:
-    build: ./app
+    build:
+      context: .
+      dockerfile: Dockerfile.app
     ports:
       - "8000:8000"
     env_file:
@@ -67,11 +65,10 @@ services:
     environment:
       # Override some env vars specific to the docker environment
       PREFECT_API_URL: http://prefect-server:4200/api
+      PREFECT_LOCAL_STORAGE_PATH: /tmp/prefect-results
     depends_on:
       - prefect-server
       - minio
-    volumes:
-      - .:/app
     networks:
       - prefect-network
 

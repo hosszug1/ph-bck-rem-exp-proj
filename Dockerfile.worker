@@ -1,0 +1,17 @@
+# Prefect version must match Dockerfile.server and pyproject.toml
+# FROM prefecthq/prefect:3-latest
+FROM python:3.13-slim
+
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+COPY workflows/ workflows/
+
+# Install dependencies
+RUN pip install --no-cache-dir -r workflows/requirements.txt
+
+
+# The healthcheck.sh file will be available in /app/workflows/ due to volume mount in docker-compose
+# Use JSON array form of CMD for running the healthcheck before starting the worker
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["./workflows/healthcheck.sh && python -m workflows.flows.deploy serve"]

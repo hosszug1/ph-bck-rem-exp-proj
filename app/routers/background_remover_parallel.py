@@ -124,7 +124,7 @@ async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
                 # Check if flow is completed
                 if flow_run.state.is_completed():
                     # Get flow result
-                    result_data = flow_run.state.result()
+                    result_data = await flow_run.state.result()
                     # Flow completed successfully
                     success_count += 1
                     results.append(
