@@ -1,0 +1,97 @@
+[project]
+name = "background-remover"
+version = "0.1.0"
+description = "A FastAPI service for removing backgrounds from images using Photoroom API"
+readme = "README.md"
+authors = [{ name = "Anon", email = "anon@example.com" }]
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "httpx>=0.25.0",
+    "python-multipart>=0.0.6",
+    "pydantic>=2.5.0",
+    "aiofiles>=23.2.0",
+    "python-dotenv>=1.0.0",
+    "prefect>=3.0.0",
+]
+requires-python = ">=3.13"
+
+[tool.setuptools]
+packages = ["app", "workflows"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.11.11",
+    "invoke>=2.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
+
+[tool.ruff]
+# Common choice; Black also defaults to 88.
+line-length = 88
+# Match your Python version (>=3.10).
+target-version = "py313"
+# Exclusion list for files/folders to exclude from linting/formatting.
+exclude = [".venv"]
+
+[tool.ruff.lint]
+# Enable some useful linting rules.
+select = ["E", "F", "I", "B", "W", "UP", "N", "C90", "ANN", "S", "T20", "Q"]
+# Explanations:
+# E - pycodestyle (error)
+# F - Pyflakes (general issues)
+# I - isort (import sorting)
+# B - flake8-bugbear (common issues)
+# W - pycodestyle (warning)
+# UP - pyupgrade (automatic updates for new Python versions)
+# N - pep8-naming (consistent naming)
+# C90 - mccabe (complexity)
+# ANN - flake8-annotations (type hints)
+# S - flake8-bandit (security checks)
+# T20 - flake8-print (warns about print statements)
+# Q - flake8-quotes (consistency in quote styles)
+
+ignore = [
+    "E501",   # Ignore line-too-long (handled by the formatter)
+    "ANN204", # Missing return type annotation for special methods
+    "ANN002", # Missing type annotation for args
+    "ANN003", # Missing type annotation for kwargs
+    "S311",   # Standard pseudo-random generators are not suitable for security/cryptographic purposes
+]
+
+[tool.ruff.lint.per-file-ignores]
+"app/routers/**/*.py" = [
+    "B008", # Do not perform function calls in argument defaults
+]
+"tasks.py" = [
+    "T201", # print() found
+]
+"**/tests/**/*.py" = [
+    "ANN001", # Missing type annotation for function argument
+    "ANN201", # Missing return type annotation for public function
+    "ANN202", # Missing type annotation for public function
+    "S101",   # Use of `assert` (allowed in tests)
+]
+
+[tool.ruff.format]
+# Enable Ruff's autoformatter
+quote-style = "double" # Choose between "single" or "double"
+indent-style = "space" # "tab" or "space"
+line-ending = "lf"     # Use "lf" for UNIX-style endings
+
+[tool.ruff.lint.isort]
+# Configure import sorting
+known-first-party = ["app"] # Ensures internal imports are correctly grouped
+combine-as-imports = true   # Merge `import a as x` with `import b as y`
+order-by-type = false       # Avoid sorting by type
+
+[tool.ruff.lint.pydocstyle]
+# Docstring style settings (choose one).
+convention = "google" # Options: "google", "numpy", "pep257"
