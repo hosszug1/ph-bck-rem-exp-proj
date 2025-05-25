@@ -15,19 +15,19 @@ class BatchImageRequest(BaseModel):
     image_urls: list[HttpUrl]
 
 
-class ImageResponse(BaseModel):
-    """Response model for single image background removal."""
+class ProcessingResult(BaseModel):
+    """Result of processing a single image."""
 
+    url: str
     success: bool
-    message: str
-    original_url: str
     error: str | None = None
+    storage_url: str | None = None
+    original_url: str
 
 
 class BatchImageResponse(BaseModel):
     """Response model for batch image background removal."""
 
-    results: list[ImageResponse]
-    total_processed: int
-    successful: int
-    failed: int
+    total_count: int
+    success_count: int
+    results: list[ProcessingResult]

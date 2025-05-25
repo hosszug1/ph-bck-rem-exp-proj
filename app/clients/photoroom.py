@@ -1,7 +1,6 @@
 """Client for interacting with the Photoroom API."""
 
 import httpx
-from fastapi import HTTPException, status
 
 from app.constants import DEFAULT_TIMEOUT, IMAGE_FILE_PARAM, SEGMENTATION_ENDPOINT
 

@@ -25,5 +25,5 @@ IMAGE_FILE_PARAM = "image_file"
 SEGMENTATION_ENDPOINT = "segment"
 
 # Prefect Client Constants
-BATCH_BACKGROUND_REMOVAL_FLOW = "batch-background-removal"
-BATCH_BACKGROUND_REMOVAL_DEPLOYMENT = "batch-background-removal-deployment"
+BACKGROUND_REMOVAL_FLOW = "background-removal"
+BACKGROUND_REMOVAL_DEPLOYMENT = "background-removal-deployment"

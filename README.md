@@ -7,7 +7,9 @@ A high-performance FastAPI service that removes backgrounds from images using th
 - **Single Image Processing**: Remove background from individual images via URL
 - **Batch Processing**: Process multiple images in parallel with consolidated results
 - **High Performance**: Async/await architecture with parallel API calls
+- **S3 Storage Integration**: Processed images are stored in MinIO (S3-compatible storage)
 - **Production Ready**: Built with FastAPI, comprehensive error handling, and API documentation
+- **Workflow Orchestration**: Uses Prefect for reliable, scalable task execution
 - **Easy Setup**: Uses `uv` for fast dependency management
 
 ## 🏗️ Project Structure
@@ -19,10 +21,18 @@ background-remover/
 │   ├── clients/
 │   │   └── photoroom.py     # Photoroom API client
 │   ├── models/
-│   │   └── __init__.py      # Pydantic request/response models
+│   │   └── background_remover.py # Pydantic request/response models
 │   └── routers/
-│       └── background_remover.py  # API endpoints
+│       ├── background_remover.py  # Standard API endpoints
+│       └── background_remover_parallel.py  # Prefect-based API endpoints
+├── workflows/
+│   ├── clients/
+│   │   ├── photoroom.py     # Thin Photoroom client
+│   │   └── minio.py         # Thin MinIO client
+│   └── flows/
+│       └── background_remover.py  # Prefect workflow definition
 ├── tests/                   # Test directory (pytest ready)
+├── docker-compose.yaml      # Docker services including Prefect and MinIO
 ├── pyproject.toml           # Project configuration
 └── README.md
 ```
@@ -54,12 +64,18 @@ background-remover/
    # PHOTOROOM_API_KEY=your_actual_api_key_here
    ```
 
-4. **Start the service:**
+4. **Start the service with Docker Compose:**
    ```bash
-   uvicorn app.main:app --reload --port 8000
+   docker-compose up -d
    ```
 
+This will start:
+- The FastAPI application on port 8000
+- The Prefect server UI on port 4200
+- MinIO server on port 9000 with its console on port 9001
+
 The service will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`.
+The MinIO console will be available at `http://localhost:9001` (login with minioadmin/minioadmin).
 
 ## 📡 API Endpoints
 
@@ -71,33 +87,32 @@ The service will be available at `http://localhost:8000` with interactive docume
 - **POST** `/api/v1/remove-background` - Remove background from single image
 - **POST** `/api/v1/remove-backgrounds` - Batch process multiple images
 
-### Experimental: Prefect-based Parallel Processing
-**⚠️ Note: This is experimental and incomplete due to time constraints**
+### Experimental: Prefect-based Parallel Processing with S3 Storage
 
-- **POST** `/api/v1/prefect/remove-backgrounds-async` - Start async batch processing with Prefect
-- **GET** `/api/v1/prefect/status/{flow_id}` - Check processing status 
-- **GET** `/api/v1/prefect/download/{flow_id}` - Download completed results
+- **POST** `/api/v1/prefect/process` - Start async batch processing with Prefect
+- **POST** `/api/v1/prefect/results` - Get processing results, including partial results
 
-This experimental implementation uses [Prefect 3.x](https://www.prefect.io/) for workflow orchestration and parallel task execution. The idea was to:
+This implementation uses [Prefect 3.x](https://www.prefect.io/) for workflow orchestration and parallel task execution, 
+and MinIO as an S3-compatible storage solution. The architecture:
 
-1. **True Parallelism**: Use Prefect workers to distribute image processing tasks across multiple workers
-2. **Durable Execution**: Leverage Prefect's built-in retry logic, error handling, and state persistence
-3. **Monitoring**: Provide real-time status tracking and progress monitoring through Prefect UI
-4. **Scalability**: Enable horizontal scaling by adding more Prefect workers
+1. **True Parallelism**: Uses Prefect workers to distribute image processing tasks across multiple workers
+2. **Durable Execution**: Leverages Prefect's built-in retry logic, error handling, and state persistence
+3. **S3 Storage**: Processed images are stored in MinIO (S3-compatible storage)
+4. **Scalability**: Enables horizontal scaling by adding more Prefect workers
 
-**Current Implementation Status:**
-- ✅ Basic Prefect flow structure in `workflows/flows/background_remover.py`
-- ✅ Prefect deployment configuration in `workflows/flows/deploy.py`
-- ✅ FastAPI router with async endpoints in `app/routers/background_remover_parallel.py`
-- ✅ Docker Compose setup with Prefect server
-- ❌ **Incomplete**: Full integration and testing ran out of time
+**Key Workflow Components:**
+- **Single Flow Design**: Each image is processed by a separate Prefect flow for better isolation
+- **MinIO Integration**: Processed images are stored in MinIO with a unique URL for retrieval
+- **Stateless API**: The API does not store state, making it easy to scale horizontally
+- **Partial Results**: The API returns partial results if some flows are still running
 
-**To explore this experimental feature:**
+**To use this feature:**
 ```bash
-# Start services with Prefect
+# Start all services with Docker Compose
 docker-compose up -d
 
 # Access Prefect UI at http://localhost:4200
+# Access MinIO Console at http://localhost:9001 (login: minioadmin/minioadmin)
 # API endpoints available at /api/v1/prefect/*
 ```
 
@@ -125,26 +140,53 @@ curl -X POST "http://localhost:8000/api/v1/remove-backgrounds" \
   }'
 ```
 
-### Python Client Example
+### Python Client Example for Prefect Workflow
+
 ```python
 import httpx
 import asyncio
+import json
 
-async def remove_background(image_url: str):
+async def process_images_with_prefect(image_urls):
     async with httpx.AsyncClient() as client:
+        # Start processing
         response = await client.post(
-            "http://localhost:8000/api/v1/remove-background",
-            json={"image_url": image_url}
+            "http://localhost:8000/api/v1/prefect/process",
+            json={"image_urls": image_urls}
         )
-        if response.status_code == 200:
-            with open("result.png", "wb") as f:
-                f.write(response.content)
-            return "Success!"
-        return f"Error: {response.text}"
+        
+        if response.status_code != 200:
+            return f"Error starting processing: {response.text}"
+        
+        # Get flow IDs
+        data = response.json()
+        flow_ids = data["flow_ids"]
+        
+        print(f"Started processing {len(flow_ids)} images. Checking results in 5 seconds...")
+        await asyncio.sleep(5)
+        
+        # Get results (this might return partial results if processing is still ongoing)
+        response = await client.post(
+            "http://localhost:8000/api/v1/prefect/results",
+            json=flow_ids
+        )
+        
+        if response.status_code != 200:
+            return f"Error getting results: {response.text}"
+        
+        results = response.json()
+        
+        print(f"Processing status: {results['success_count']}/{results['total_count']} completed")
+        
+        # If you want to wait for all to complete, you can poll until success_count equals total_count
+        return results
 
 # Usage
-result = asyncio.run(remove_background("https://example.com/image.jpg"))
-print(result)
+result = asyncio.run(process_images_with_prefect([
+    "https://example.com/image1.jpg",
+    "https://example.com/image2.jpg"
+]))
+print(json.dumps(result, indent=2))
 ```
 
 ## 🏗️ Development
