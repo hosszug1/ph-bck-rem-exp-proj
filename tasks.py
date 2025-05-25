@@ -18,7 +18,7 @@ def run_lint(ctx: Context) -> None:
 def run_tests(ctx: Context) -> None:
     """Run all tests with coverage."""
 
-    ctx.run("pytest .")
+    ctx.run("pytest --cov tests/")
 
 
 @task
