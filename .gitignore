@@ -65,4 +65,4 @@ batch_result.png
 no_bg.png
 
 # Generated files
-requirements.txt
+**/*requirements.txt

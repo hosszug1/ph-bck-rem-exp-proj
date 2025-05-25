@@ -42,6 +42,19 @@ services:
     volumes:
       - .:/app
 
+  # Prefect worker for running flows
+  prefect-worker:
+    build: ./workflows
+    env_file:
+      - .env
+    environment:
+      # Override some env vars specific to the docker environment
+      PREFECT_API_URL: http://prefect-server:4200/api
+    depends_on:
+      - prefect-server
+    volumes:
+      - .:/app
+
 volumes:
   prefect_data:
   minio_data:
