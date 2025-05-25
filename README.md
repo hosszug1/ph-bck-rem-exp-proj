@@ -90,7 +90,7 @@ The MinIO console will be available at `http://localhost:9001` (login with minio
 - **POST** `/api/v1/remove-background` - Remove background from single image
 - **POST** `/api/v1/remove-backgrounds` - Batch process multiple images
 
-### Experimental: Prefect-based Parallel Processing with S3 Storage
+### Background Removal (Enhanced)
 
 - **POST** `/api/v2/remove-backgrounds` - Start async batch processing with Prefect
 - **POST** `/api/v2/remove-backgrounds/results` - Get processing results, including partial results
@@ -119,7 +119,7 @@ python -m workflows.flows.deploy serve
 
 # Access Prefect UI at http://localhost:4200
 # Access MinIO Console at http://localhost:9001 (login: minioadmin/minioadmin)
-# API endpoints available at /api/v1/prefect/*
+# API endpoints available at /api/v2/*
 ```
 
 ## 🔄 Prefect Workflows
@@ -140,7 +140,7 @@ The application uses Prefect for workflow orchestration. Here's how to work with
 
 3. **Triggering flows manually:**
    - Through the Prefect UI: Navigate to Deployments and click "Run"
-   - Through the API: Use the FastAPI endpoints at `/api/v1/prefect/*`
+   - Through the API: Use the FastAPI endpoints at `/api/v2/*`
 
 4. **Viewing results:**
    - Flow results are stored in MinIO and can be accessed via the URLs returned by the API
@@ -168,54 +168,46 @@ curl -X POST "http://localhost:8000/api/v1/remove-backgrounds" \
   }'
 ```
 
-### Python Client Example for Prefect Workflow
-
-```python
-import httpx
-import asyncio
-import json
-
-async def process_images_with_prefect(image_urls):
-    async with httpx.AsyncClient() as client:
-        # Start processing
-        response = await client.post(
-            "http://localhost:8000/api/v1/prefect/process",
-            json={"image_urls": image_urls}
-        )
-        
-        if response.status_code != 200:
-            return f"Error starting processing: {response.text}"
-        
-        # Get flow IDs
-        data = response.json()
-        flow_ids = data["flow_ids"]
-        
-        print(f"Started processing {len(flow_ids)} images. Checking results in 5 seconds...")
-        await asyncio.sleep(5)
-        
-        # Get results (this might return partial results if processing is still ongoing)
-        response = await client.post(
-            "http://localhost:8000/api/v1/prefect/results",
-            json=flow_ids
-        )
-        
-        if response.status_code != 200:
-            return f"Error getting results: {response.text}"
-        
-        results = response.json()
-        
-        print(f"Processing status: {results['success_count']}/{results['total_count']} completed")
-        
-        # If you want to wait for all to complete, you can poll until success_count equals total_count
-        return results
-
-# Usage
-result = asyncio.run(process_images_with_prefect([
-    "https://example.com/image1.jpg",
-    "https://example.com/image2.jpg"
-]))
-print(json.dumps(result, indent=2))
+### Truly Parallel Batch Processing with Prefect
+```bash
+curl -X POST "http://localhost:8000/api/v2/remove-backgrounds" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image_urls": [
+      "https://example.com/image1.jpg",
+      "https://example.com/image2.jpg"
+    ]
+  }'
 ```
+
+The above curl will return the flow_ids to use to query for results. Example:
+
+```json
+{
+  "flow_ids": [
+    "bb756110-a37c-457b-9acd-f6fc16081868",
+    "e8d64f58-69db-404c-8541-32c7c2110126",
+    "fef9c3ac-033b-4f5e-9a22-3c579cf3e8f9"
+  ],
+  "message": "Started processing 3 images",
+  "status": "RUNNING",
+  "image_count": 3
+}
+```
+
+Then use the `/results` endpoint to get the actual results.
+
+```bash
+curl -X POST "http://localhost:8000/api/v2/remove-backgrounds/results" \
+  -H "Content-Type: application/json" \
+  -d '{
+    [
+      "flow_id_0",
+      "flow_id_1"
+    ]
+  }'
+```
+
 
 ## 🏗️ Development
 
