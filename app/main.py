@@ -6,7 +6,7 @@ from app.lifespan import lifespan
 from app.routers import background_remover, background_remover_parallel
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 app = FastAPI(
     title="Background Remover Service",

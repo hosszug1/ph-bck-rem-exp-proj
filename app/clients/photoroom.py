@@ -39,25 +39,13 @@ class PhotoroomClient:
         async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
             files = {IMAGE_FILE_PARAM: image_bytes}
 
-            try:
-                response = await client.post(
-                    f"{self.base_url}/{SEGMENTATION_ENDPOINT}",
-                    headers=self.headers,
-                    files=files,
-                )
-                response.raise_for_status()
-                return response.content
-
-            except httpx.HTTPStatusError as e:
-                raise HTTPException(
-                    status_code=e.response.status_code,
-                    detail=f"Photoroom API error: {e.response.text}",
-                ) from e
-            except httpx.RequestError as e:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Failed to connect to Photoroom API: {str(e)}",
-                ) from e
+            response = await client.post(
+                f"{self.base_url}/{SEGMENTATION_ENDPOINT}",
+                headers=self.headers,
+                files=files,
+            )
+            response.raise_for_status()
+            return response.content
 
     def remove_background_sync(self, image_bytes: bytes) -> bytes:
         """Remove background from image bytes (synchronous version for parallel processing).
@@ -74,22 +62,10 @@ class PhotoroomClient:
         with httpx.Client(timeout=DEFAULT_TIMEOUT) as client:
             files = {IMAGE_FILE_PARAM: image_bytes}
 
-            try:
-                response = client.post(
-                    f"{self.base_url}/{SEGMENTATION_ENDPOINT}",
-                    headers=self.headers,
-                    files=files,
-                )
-                response.raise_for_status()
-                return response.content
-
-            except httpx.HTTPStatusError as e:
-                raise HTTPException(
-                    status_code=e.response.status_code,
-                    detail=f"Photoroom API error: {e.response.text}",
-                ) from e
-            except httpx.RequestError as e:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Failed to connect to Photoroom API: {str(e)}",
-                ) from e
+            response = client.post(
+                f"{self.base_url}/{SEGMENTATION_ENDPOINT}",
+                headers=self.headers,
+                files=files,
+            )
+            response.raise_for_status()
+            return response.content
