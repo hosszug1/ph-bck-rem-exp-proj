@@ -2,22 +2,19 @@
 
 import http
 
-from fastapi.testclient import TestClient
-
 from app.constants import (
     MEDIA_TYPE_IMAGE,
     MEDIA_TYPE_ZIP,
     SINGLE_IMAGE_FILENAME,
     ZIP_FILENAME,
 )
-from app.routers.background_remover import router
 
 # Module-level constants
 TEST_URL = "https://example.com/test_image.jpg"
 
 
-async def test_remove_background_success(
-    mocker, photoroom_client_mock, test_image_data, processed_image_data
+def test_remove_background_success(
+    mocker, photoroom_client_mock, test_image_data, processed_image_data, client
 ):
     """Test successful background removal from URL."""
     # Mock fetch_image to return test image data
@@ -25,19 +22,11 @@ async def test_remove_background_success(
         "app.routers.background_remover.fetch_image", return_value=test_image_data
     )
 
-    # Create a test client with our router
-    client = TestClient(router)
-    client.app.dependency_overrides = {
-        "app.routers.background_remover.get_photoroom_client": lambda: photoroom_client_mock
-    }
-
     # Setup photoroom_client_mock
     photoroom_client_mock.remove_background.return_value = processed_image_data
 
     # Make request
-    response = await client.post(
-        "/api/v1/remove-background", json={"image_url": TEST_URL}
-    )
+    response = client.post("/api/v1/remove-background", json={"image_url": TEST_URL})
 
     # Check response
     assert response.status_code == http.HTTPStatus.OK
@@ -53,8 +42,8 @@ async def test_remove_background_success(
     photoroom_client_mock.remove_background.assert_called_once_with(test_image_data)
 
 
-async def test_remove_backgrounds_batch_success(
-    mocker, photoroom_client_mock, test_image_data, processed_image_data
+def test_remove_backgrounds_batch_success(
+    mocker, photoroom_client_mock, test_image_data, processed_image_data, client
 ):
     """Test successful batch background removal."""
     # Mock fetch_image to return test image data
@@ -68,20 +57,12 @@ async def test_remove_backgrounds_batch_success(
         return_value=b"mock_zip_data",
     )
 
-    # Create a test client with our router
-    client = TestClient(router)
-    client.app.dependency_overrides = {
-        "app.routers.background_remover.get_photoroom_client": lambda: photoroom_client_mock
-    }
-
     # Setup photoroom_client_mock
     photoroom_client_mock.remove_background.return_value = processed_image_data
 
     # Make request with multiple URLs
     urls = [f"{TEST_URL}?id=1", f"{TEST_URL}?id=2"]
-    response = await client.post(
-        "/api/v1/remove-backgrounds", json={"image_urls": urls}
-    )
+    response = client.post("/api/v1/remove-backgrounds", json={"image_urls": urls})
 
     # Check response
     assert response.status_code == http.HTTPStatus.OK
@@ -103,24 +84,22 @@ async def test_remove_backgrounds_batch_success(
     assert all(url in [item[0] for item in zip_call_args] for url in urls)
 
 
-async def test_remove_backgrounds_batch_empty(client):
+def test_remove_backgrounds_batch_empty(client):
     """Test batch endpoint with empty URLs list."""
-    response = await client.post("/api/v1/remove-backgrounds", json={"image_urls": []})
+    response = client.post("/api/v1/remove-backgrounds", json={"image_urls": []})
 
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
     assert "At least one image URL is required" in response.text
 
 
-async def test_remove_backgrounds_batch_too_many(client):
+def test_remove_backgrounds_batch_too_many(client):
     """Test batch endpoint with too many URLs."""
     # Create a list with MAX_BATCH_SIZE + 1 URLs
     from app.constants import MAX_BATCH_SIZE
 
     urls = [f"{TEST_URL}?id={i}" for i in range(MAX_BATCH_SIZE + 1)]
 
-    response = await client.post(
-        "/api/v1/remove-backgrounds", json={"image_urls": urls}
-    )
+    response = client.post("/api/v1/remove-backgrounds", json={"image_urls": urls})
 
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
     assert "Maximum" in response.text

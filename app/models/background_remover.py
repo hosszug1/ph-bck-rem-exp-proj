@@ -15,6 +15,12 @@ class BatchImageRequest(BaseModel):
     image_urls: list[HttpUrl]
 
 
+class BatchResultsRequest(BaseModel):
+    """Request model for retrieving batch processing results."""
+
+    flow_ids: list[str]
+
+
 class ProcessingResult(BaseModel):
     """Result of processing a single image."""
 

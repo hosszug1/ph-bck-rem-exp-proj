@@ -3,35 +3,32 @@
 import http
 from uuid import UUID
 
-from fastapi.testclient import TestClient
-
 from app.constants import (
     BACKGROUND_REMOVAL_DEPLOYMENT,
     BACKGROUND_REMOVAL_FLOW,
     MAX_BATCH_SIZE,
 )
-from app.routers.background_remover_parallel import router
+from app.models.background_remover import BatchResultsRequest
 
 # Module-level constants
 TEST_URL = "https://example.com/test_image.jpg"
 MOCK_FLOW_ID = "12345678-1234-5678-1234-567812345678"
 
 
-async def test_start_batch_processing_success(mocker, photoroom_client_mock):
+def test_start_batch_processing_success(mocker, photoroom_client_mock, client):
     """Test successful start of batch processing."""
     # Mock run_deployment
     mock_flow_run = mocker.MagicMock()
     mock_flow_run.id = UUID(MOCK_FLOW_ID)
+
+    # Create an async mock for run_deployment
+    async def mock_run_deployment_async(*args, **kwargs):
+        return mock_flow_run
+
     mock_run_deployment = mocker.patch(
         "app.routers.background_remover_parallel.run_deployment",
-        return_value=mock_flow_run,
+        side_effect=mock_run_deployment_async,
     )
-
-    # Create a test client with our router
-    client = TestClient(router)
-    client.app.dependency_overrides = {
-        "app.routers.background_remover_parallel.get_photoroom_client": lambda: photoroom_client_mock
-    }
 
     # Setup photoroom_client_mock
     photoroom_client_mock.api_key = "test_api_key"
@@ -39,9 +36,7 @@ async def test_start_batch_processing_success(mocker, photoroom_client_mock):
 
     # Make request with multiple URLs
     urls = [f"{TEST_URL}?id=1", f"{TEST_URL}?id=2"]
-    response = await client.post(
-        "/api/v2/remove-backgrounds", json={"image_urls": urls}
-    )
+    response = client.post("/api/v2/remove-backgrounds", json={"image_urls": urls})
 
     # Check response
     assert response.status_code == http.HTTPStatus.OK
@@ -65,53 +60,66 @@ async def test_start_batch_processing_success(mocker, photoroom_client_mock):
         assert kwargs["parameters"]["api_url"] == "https://test.example.com"
 
 
-async def test_start_batch_processing_empty(client):
+def test_start_batch_processing_empty(client):
     """Test batch endpoint with empty URLs list."""
-    response = await client.post("/api/v2/remove-backgrounds", json={"image_urls": []})
+    response = client.post("/api/v2/remove-backgrounds", json={"image_urls": []})
 
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
     assert "At least one image URL is required" in response.text
 
 
-async def test_start_batch_processing_too_many(client):
+def test_start_batch_processing_too_many(client):
     """Test batch endpoint with too many URLs."""
     # Create a list with MAX_BATCH_SIZE + 1 URLs
     urls = [f"{TEST_URL}?id={i}" for i in range(MAX_BATCH_SIZE + 1)]
 
-    response = await client.post(
-        "/api/v2/remove-backgrounds", json={"image_urls": urls}
-    )
+    response = client.post("/api/v2/remove-backgrounds", json={"image_urls": urls})
 
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
     assert "Maximum" in response.text
 
 
-async def test_get_batch_results_success(mocker):
+def test_get_batch_results_success(mocker, client):
     """Test successful retrieval of batch results."""
     # Mock Prefect client
-    mock_client = mocker.AsyncMock()
+    mock_client = mocker.MagicMock()
+
+    # Track calls for assertion
+    called_with = []
+
+    # Setup a proper context manager return
+    async_mock_cm = mocker.AsyncMock()
+    async_mock_cm.__aenter__.return_value = mock_client
     mocker.patch(
         "app.routers.background_remover_parallel.get_client",
-        return_value=mock_client,
+        return_value=async_mock_cm,
     )
-    mock_client.__aenter__.return_value = mock_client
 
     # Mock flow run with completed state
-    mock_flow_run = mocker.AsyncMock()
+    mock_flow_run = mocker.MagicMock()
     mock_flow_run.state.is_completed.return_value = True
-    mock_flow_run.state.result.return_value = {
-        "url": "https://processed.example.com/image.png",
-        "original_url": TEST_URL,
-        "error": None,
-    }
-    mock_client.read_flow_run.return_value = mock_flow_run
 
-    # Create a test client with our router
-    client = TestClient(router)
+    # Create a proper awaitable result method
+    async def mock_result():
+        return {
+            "url": "https://processed.example.com/image.png",
+            "original_url": TEST_URL,
+            "error": None,
+        }
 
-    # Make request with flow IDs
-    response = await client.post(
-        "/api/v2/remove-backgrounds/results", json={"flow_ids": [MOCK_FLOW_ID]}
+    mock_flow_run.state.result = mock_result
+
+    # Setup the read_flow_run mock to be awaitable
+    async def mock_read_flow_run(flow_uuid):
+        called_with.append(flow_uuid)
+        return mock_flow_run
+
+    mock_client.read_flow_run = mock_read_flow_run
+
+    # Make request with flow IDs in the request body
+    request_model = BatchResultsRequest(flow_ids=[MOCK_FLOW_ID])
+    response = client.post(
+        "/api/v2/remove-backgrounds/results", json=request_model.model_dump()
     )
 
     # Check response
@@ -128,13 +136,15 @@ async def test_get_batch_results_success(mocker):
     )
 
     # Verify client was called correctly
-    mock_client.read_flow_run.assert_called_once_with(UUID(MOCK_FLOW_ID))
+    assert len(called_with) == 1
+    assert called_with[0] == UUID(MOCK_FLOW_ID)
 
 
-async def test_get_batch_results_empty(client):
+def test_get_batch_results_empty(client):
     """Test results endpoint with empty flow IDs list."""
-    response = await client.post(
-        "/api/v2/remove-backgrounds/results", json={"flow_ids": []}
+    request_model = BatchResultsRequest(flow_ids=[])
+    response = client.post(
+        "/api/v2/remove-backgrounds/results", json=request_model.model_dump()
     )
 
     assert response.status_code == http.HTTPStatus.BAD_REQUEST

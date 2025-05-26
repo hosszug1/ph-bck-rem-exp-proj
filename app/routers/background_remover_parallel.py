@@ -17,6 +17,7 @@ from app.dependencies import get_photoroom_client
 from app.models.background_remover import (
     BatchImageRequest,
     BatchImageResponse,
+    BatchResultsRequest,
     ProcessingResult,
 )
 
@@ -78,18 +79,19 @@ async def start_batch_processing(
 
 
 @router.post("/remove-backgrounds/results")
-async def get_batch_results(flow_ids: list[str]) -> BatchImageResponse:
+async def get_batch_results(request: BatchResultsRequest) -> BatchImageResponse:
     """Get results for multiple flows.
 
     Returns processing results for the specified flow IDs, including partial results
     if some flows are still running.
 
     Args:
-        flow_ids: List of flow IDs to get results for
+        request: BatchResultsRequest containing flow_ids list
 
     Returns:
         BatchImageResponse with information about processing success and URLs to the images
     """
+    flow_ids = request.flow_ids
     if not flow_ids:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
