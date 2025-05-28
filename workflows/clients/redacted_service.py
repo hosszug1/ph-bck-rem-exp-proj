@@ -3,15 +3,15 @@
 import httpx
 
 
-class PhotoroomClient:
-    """Simple client for Photoroom background removal API."""
+class RedactedServiceClient:
+    """Simple client for RedactedService background removal API."""
 
     def __init__(self, api_url: str, api_key: str):
-        """Initialize the Photoroom client.
+        """Initialize the RedactedService client.
 
         Args:
-            api_url: The Photoroom API URL
-            api_key: The Photoroom API key
+            api_url: The RedactedService API URL
+            api_key: The RedactedService API key
         """
         self.api_url = api_url
         self.api_key = api_key

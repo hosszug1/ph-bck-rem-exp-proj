@@ -1,6 +1,7 @@
-# Background Remover Service
+<!-- filepath: [REDACTED] -->
+# [REDACTED] Service
 
-A high-performance FastAPI service that removes backgrounds from images using the Photoroom API. This service supports both single image processing and batch processing with parallel execution.
+A high-performance FastAPI service that removes backgrounds from images using the [REDACTED] API. This service supports both single image processing and batch processing with parallel execution.
 
 ## 🌟 Features
 
@@ -15,22 +16,22 @@ A high-performance FastAPI service that removes backgrounds from images using th
 ## 🏗️ Project Structure
 
 ```
-background-remover/
+[REDACTED]/
 ├── app/
 │   ├── main.py              # FastAPI application entry point
 │   ├── clients/
-│   │   └── photoroom.py     # Photoroom API client
+│   │   └── [REDACTED].py    # [REDACTED] API client
 │   ├── models/
-│   │   └── background_remover.py # Pydantic request/response models
+│   │   └── [REDACTED].py    # Pydantic request/response models
 │   └── routers/
-│       ├── background_remover.py  # Standard API endpoints
-│       └── background_remover_parallel.py  # Prefect-based API endpoints
+│       ├── [REDACTED].py    # Standard API endpoints
+│       └── [REDACTED]_parallel.py  # Prefect-based API endpoints
 ├── workflows/
 │   ├── clients/
-│   │   ├── photoroom.py     # Thin Photoroom client
+│   │   ├── [REDACTED].py    # Thin [REDACTED] client
 │   │   └── minio.py         # Thin MinIO client
 │   └── flows/
-│       └── background_remover.py  # Prefect workflow definition
+│       └── [REDACTED].py    # Prefect workflow definition
 ├── tests/                   # Test directory (pytest ready)
 ├── docker-compose.yaml      # Docker services including Prefect and MinIO
 ├── pyproject.toml           # Project configuration
@@ -47,7 +48,7 @@ background-remover/
 
 1. **Clone and navigate to the project:**
    ```bash
-   cd background-remover
+   cd [REDACTED]
    ```
 
 2. **Create virtual environment and install dependencies:**
@@ -60,8 +61,8 @@ background-remover/
 3. **Set up environment variables:**
    ```bash
    cp .env.example .env
-   # Edit .env and set your Photoroom API key:
-   # PHOTOROOM_API_KEY=your_actual_api_key_here
+   # Edit .env and set your [REDACTED] API key:
+   # [REDACTED]_API_KEY=your_actual_api_key_here
    ```
 
 4. **Start the service with Docker Compose:**
@@ -86,11 +87,11 @@ The MinIO console will be available at `http://localhost:9001` (login with minio
 - **GET** `/` - Service status
 - **GET** `/health` - Health check
 
-### Background Removal (Standard)
+### [REDACTED] (Standard)
 - **POST** `/api/v1/remove-background` - Remove background from single image
 - **POST** `/api/v1/remove-backgrounds` - Batch process multiple images
 
-### Background Removal (Enhanced)
+### [REDACTED] (Enhanced)
 
 - **POST** `/api/v2/remove-backgrounds` - Start async batch processing with Prefect
 - **POST** `/api/v2/remove-backgrounds/results` - Get processing results, including partial results
@@ -108,19 +109,6 @@ and MinIO as an S3-compatible storage solution. The architecture:
 - **MinIO Integration**: Processed images are stored in MinIO with a unique URL for retrieval
 - **Stateless API**: The API does not store state, making it easy to scale horizontally
 - **Partial Results**: The API returns partial results if some flows are still running
-
-**To use this feature:**
-
-Assuming you have already started all docker images with `docker compose`:
-
-```bash
-# Create a deployment for the background remover flow
-python -m workflows.flows.deploy serve
-
-# Access Prefect UI at http://localhost:4200
-# Access MinIO Console at http://localhost:9001 (login: minioadmin/minioadmin)
-# API endpoints available at /api/v2/*
-```
 
 ## 🔄 Prefect Workflows
 
@@ -143,7 +131,7 @@ The application uses Prefect for workflow orchestration. Here's how to work with
    - Through the API: Use the FastAPI endpoints at `/api/v2/*`
 
 4. **Viewing results:**
-   - Flow results are stored in MinIO and can be accessed via the URLs returned by the API
+   - Flow results are stored in MinIO and can be accessed via the URLs returned by the API (you might need to replace the dockerised address, "minio:9000" with "localhost:9001" to view the images).
    - The Prefect UI provides detailed logs and execution history
 
 ## 🔧 Usage Examples

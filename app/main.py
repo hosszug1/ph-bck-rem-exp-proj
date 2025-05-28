@@ -10,7 +10,7 @@ load_dotenv(override=True)
 
 app = FastAPI(
     title="Background Remover Service",
-    description="A service to remove backgrounds from images using Photoroom API",
+    description="A service to remove backgrounds from images using RedactedService API",
     version="0.1.0",
     lifespan=lifespan,
 )

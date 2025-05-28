@@ -14,7 +14,7 @@ TEST_URL = "https://example.com/test_image.jpg"
 
 
 def test_remove_background_success(
-    mocker, photoroom_client_mock, test_image_data, processed_image_data, client
+    mocker, redacted_service_client_mock, test_image_data, processed_image_data, client
 ):
     """Test successful background removal from URL."""
     # Mock fetch_image to return test image data
@@ -22,8 +22,8 @@ def test_remove_background_success(
         "app.routers.background_remover.fetch_image", return_value=test_image_data
     )
 
-    # Setup photoroom_client_mock
-    photoroom_client_mock.remove_background.return_value = processed_image_data
+    # Setup redacted_service_client_mock
+    redacted_service_client_mock.remove_background.return_value = processed_image_data
 
     # Make request
     response = client.post("/api/v1/remove-background", json={"image_url": TEST_URL})
@@ -39,11 +39,13 @@ def test_remove_background_success(
 
     # Verify dependencies were called correctly
     mock_fetch.assert_called_once_with(TEST_URL)
-    photoroom_client_mock.remove_background.assert_called_once_with(test_image_data)
+    redacted_service_client_mock.remove_background.assert_called_once_with(
+        test_image_data
+    )
 
 
 def test_remove_backgrounds_batch_success(
-    mocker, photoroom_client_mock, test_image_data, processed_image_data, client
+    mocker, redacted_service_client_mock, test_image_data, processed_image_data, client
 ):
     """Test successful batch background removal."""
     # Mock fetch_image to return test image data
@@ -57,8 +59,8 @@ def test_remove_backgrounds_batch_success(
         return_value=b"mock_zip_data",
     )
 
-    # Setup photoroom_client_mock
-    photoroom_client_mock.remove_background.return_value = processed_image_data
+    # Setup redacted_service_client_mock
+    redacted_service_client_mock.remove_background.return_value = processed_image_data
 
     # Make request with multiple URLs
     urls = [f"{TEST_URL}?id=1", f"{TEST_URL}?id=2"]
@@ -75,7 +77,7 @@ def test_remove_backgrounds_batch_success(
 
     # Verify dependencies were called correctly
     assert mock_fetch.call_count == 2
-    assert photoroom_client_mock.remove_background.call_count == 2
+    assert redacted_service_client_mock.remove_background.call_count == 2
     mock_zip.assert_called_once()
 
     # Check that zip was created with the right data

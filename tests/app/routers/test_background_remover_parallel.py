@@ -15,7 +15,7 @@ TEST_URL = "https://example.com/test_image.jpg"
 MOCK_FLOW_ID = "12345678-1234-5678-1234-567812345678"
 
 
-def test_start_batch_processing_success(mocker, photoroom_client_mock, client):
+def test_start_batch_processing_success(mocker, redacted_service_client_mock, client):
     """Test successful start of batch processing."""
     # Mock run_deployment
     mock_flow_run = mocker.MagicMock()
@@ -30,9 +30,9 @@ def test_start_batch_processing_success(mocker, photoroom_client_mock, client):
         side_effect=mock_run_deployment_async,
     )
 
-    # Setup photoroom_client_mock
-    photoroom_client_mock.api_key = "test_api_key"
-    photoroom_client_mock.base_url = "https://test.example.com"
+    # Setup redacted_service_client_mock
+    redacted_service_client_mock.api_key = "test_api_key"
+    redacted_service_client_mock.base_url = "https://test.example.com"
 
     # Make request with multiple URLs
     urls = [f"{TEST_URL}?id=1", f"{TEST_URL}?id=2"]

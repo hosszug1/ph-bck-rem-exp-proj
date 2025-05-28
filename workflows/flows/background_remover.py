@@ -7,7 +7,7 @@ import httpx
 from prefect import flow, get_run_logger
 
 from workflows.clients.minio import MinioClient
-from workflows.clients.photoroom import PhotoroomClient
+from workflows.clients.redacted_service import RedactedServiceClient
 from workflows.constants import (
     DEFAULT_REQUEST_TIMEOUT,
     DEFAULT_RETRIES,
@@ -30,8 +30,8 @@ def background_removal_flow(image_url: str, api_url: str, api_key: str) -> dict:
 
     Args:
         image_url: URL of the image to process
-        api_url: Photoroom API URL
-        api_key: Photoroom API key
+        api_url: RedactedService API URL
+        api_key: RedactedService API key
 
     Returns:
         Dictionary with processing results including the MinIO URL
@@ -45,9 +45,9 @@ def background_removal_flow(image_url: str, api_url: str, api_key: str) -> dict:
         response.raise_for_status()
         image_bytes = response.content
 
-    # Process with Photoroom
-    photoroom_client = PhotoroomClient(api_url, api_key)
-    processed_image = photoroom_client.remove_background(image_bytes)
+    # Process with RedactedService
+    redacted_service_client = RedactedServiceClient(api_url, api_key)
+    processed_image = redacted_service_client.remove_background(image_bytes)
 
     # Generate a filename based on the original URL
     url_path = Path(image_url).name if "/" in image_url else f"image_{int(time.time())}"

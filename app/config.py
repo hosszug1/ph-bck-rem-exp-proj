@@ -3,9 +3,8 @@
 import os
 
 from app.constants import (
-    DEFAULT_PHOTOROOM_API_URL,
-    ENV_PHOTOROOM_API_KEY,
-    ENV_PHOTOROOM_API_URL,
+    ENV_REDACTED_SERVICE_API_KEY,
+    ENV_REDACTED_SERVICE_API_URL,
 )
 
 
@@ -14,9 +13,11 @@ class Settings:
 
     def __init__(self):
         """Initialize settings from environment variables."""
-        self.photoroom_api_key = self._get_required_env(ENV_PHOTOROOM_API_KEY)
-        self.photoroom_api_url = self._get_required_env(
-            ENV_PHOTOROOM_API_URL, DEFAULT_PHOTOROOM_API_URL
+        self.redacted_service_api_key = self._get_required_env(
+            ENV_REDACTED_SERVICE_API_KEY
+        )
+        self.redacted_service_api_url = self._get_required_env(
+            ENV_REDACTED_SERVICE_API_URL
         )
 
     def _get_required_env(self, key: str, default: str | None = None) -> str:

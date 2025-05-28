@@ -6,7 +6,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.clients.photoroom import PhotoroomClient
+from app.clients.redacted_service import RedactedServiceClient
 from app.config import Settings
 from app.main import app as main_app
 
@@ -36,9 +36,9 @@ def settings_override():
 
 
 @pytest.fixture
-def photoroom_client_mock(processed_image_data):
-    """Fixture providing a mocked PhotoroomClient."""
-    client = MagicMock(spec=PhotoroomClient)
+def redacted_service_client_mock(processed_image_data):
+    """Fixture providing a mocked RedactedServiceClient."""
+    client = MagicMock(spec=RedactedServiceClient)
     client.api_key = "test_api_key"
     client.base_url = "https://test.example.com"
     client.remove_background.return_value = processed_image_data
@@ -47,12 +47,12 @@ def photoroom_client_mock(processed_image_data):
 
 
 @pytest.fixture
-def app(photoroom_client_mock):
+def app(redacted_service_client_mock):
     """Fixture providing a test FastAPI app with mocked dependencies."""
     app = FastAPI()
 
     # Mimic the lifespan context to set up the app state
-    app.state.photoroom_client = photoroom_client_mock
+    app.state.redacted_service_client = redacted_service_client_mock
 
     return app
 
@@ -64,7 +64,7 @@ def test_client(app):
 
 
 @pytest.fixture
-def main_test_client(photoroom_client_mock):
+def main_test_client(redacted_service_client_mock):
     """Fixture providing a TestClient for the main FastAPI app."""
-    main_app.state.photoroom_client = photoroom_client_mock
+    main_app.state.redacted_service_client = redacted_service_client_mock
     return TestClient(main_app)

@@ -1,21 +1,21 @@
-"""Client for interacting with the Photoroom API."""
+"""Client for interacting with the RedactedService API."""
 
 import httpx
 
 from app.constants import DEFAULT_TIMEOUT, IMAGE_FILE_PARAM, SEGMENTATION_ENDPOINT
 
 
-class PhotoroomClient:
-    """Client for Photoroom background removal API."""
+class RedactedServiceClient:
+    """Client for RedactedService background removal API."""
 
     def __init__(self, api_url: str, api_key: str):
-        """Initialize the Photoroom client.
+        """Initialize the RedactedService client.
 
         Args:
-            api_key: The Photoroom API key (required)
+            api_key: The RedactedService API key (required)
         """
         if not api_key:
-            raise ValueError("Photoroom API key is required")
+            raise ValueError("RedactedService API key is required")
 
         self.api_key = api_key
         self.base_url = api_url

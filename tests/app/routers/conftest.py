@@ -5,7 +5,7 @@ from app.main import app
 
 
 @pytest.fixture
-def client(photoroom_client_mock):
+def client(redacted_service_client_mock):
     """Fixture providing a TestClient for the parallel router."""
-    app.state.photoroom_client = photoroom_client_mock
+    app.state.redacted_service_client = redacted_service_client_mock
     return TestClient(app)
