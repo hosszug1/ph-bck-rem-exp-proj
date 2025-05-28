@@ -4,7 +4,7 @@ import asyncio
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from app.clients.photoroom import PhotoroomClient
+from app.clients.redacted_service import RedactedServiceClient
 from app.constants import (
     MAX_BATCH_SIZE,
     MEDIA_TYPE_IMAGE,
@@ -12,7 +12,7 @@ from app.constants import (
     SINGLE_IMAGE_FILENAME,
     ZIP_FILENAME,
 )
-from app.dependencies import get_photoroom_client
+from app.dependencies import get_redacted_service_client
 from app.helpers.image import create_zip_archive, fetch_image
 from app.models.background_remover import BatchImageRequest, ImageRequest
 
@@ -22,13 +22,15 @@ router = APIRouter(prefix="/api/v1", tags=["background-removal"])
 @router.post("/remove-background")
 async def remove_background(
     request: ImageRequest,
-    photoroom_client: PhotoroomClient = Depends(get_photoroom_client),
+    redacted_service_client: RedactedServiceClient = Depends(
+        get_redacted_service_client
+    ),
 ) -> Response:
     """Remove background from a single image URL and return the processed image.
 
     Args:
         request: ImageRequest containing the image URL
-        photoroom_client: PhotoroomClient dependency
+        redacted_service_client: RedactedServiceClient dependency
 
     Returns:
         The processed image with background removed as bytes
@@ -37,7 +39,7 @@ async def remove_background(
     image_bytes = await fetch_image(str(request.image_url))
 
     # Remove background
-    processed_image = await photoroom_client.remove_background(image_bytes)
+    processed_image = await redacted_service_client.remove_background(image_bytes)
 
     # Return the processed image as bytes
     return Response(
@@ -52,13 +54,15 @@ async def remove_background(
 @router.post("/remove-backgrounds")
 async def remove_backgrounds_batch(
     request: BatchImageRequest,
-    photoroom_client: PhotoroomClient = Depends(get_photoroom_client),
+    redacted_service_client: RedactedServiceClient = Depends(
+        get_redacted_service_client
+    ),
 ) -> Response:
     """Remove backgrounds from multiple image URLs and return as a ZIP archive.
 
     Args:
         request: BatchImageRequest containing multiple image URLs
-        photoroom_client: PhotoroomClient dependency
+        redacted_service_client: RedactedServiceClient dependency
 
     Returns:
         ZIP archive containing all successfully processed images
@@ -79,7 +83,7 @@ async def remove_backgrounds_batch(
     async def process_image_for_batch(url: str) -> tuple[str, bytes | None]:
         """Process image and return URL and processed bytes."""
         image_bytes = await fetch_image(url)
-        processed_image = await photoroom_client.remove_background(image_bytes)
+        processed_image = await redacted_service_client.remove_background(image_bytes)
         return url, processed_image
 
     tasks = [process_image_for_batch(str(url)) for url in request.image_urls]

@@ -1,9 +1,6 @@
 # Environment Constants
-ENV_PHOTOROOM_API_KEY = "PHOTOROOM_API_KEY"
-ENV_PHOTOROOM_API_URL = "PHOTOROOM_API_URL"
-
-# Photoroom Client
-DEFAULT_PHOTOROOM_API_URL = "https://sdk.photoroom.com/v1"
+ENV_REDACTED_SERVICE_API_KEY = "REDACTED_SERVICE_API_KEY"
+ENV_REDACTED_SERVICE_API_URL = "REDACTED_SERVICE_API_URL"
 
 # Generic constants.
 DEFAULT_TIMEOUT = 10.0
@@ -20,7 +17,7 @@ DEFAULT_IMAGE_NAME = "image"
 PNG_EXTENSION = ".png"
 SAFE_FILENAME_CHARS = "._-"
 
-# Photoroom Client Constants
+# RedactedService Client Constants
 IMAGE_FILE_PARAM = "image_file"
 SEGMENTATION_ENDPOINT = "segment"
 

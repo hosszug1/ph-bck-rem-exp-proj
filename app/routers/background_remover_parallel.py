@@ -7,13 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from prefect import get_client
 from prefect.deployments import run_deployment
 
-from app.clients.photoroom import PhotoroomClient
+from app.clients.redacted_service import RedactedServiceClient
 from app.constants import (
     BACKGROUND_REMOVAL_DEPLOYMENT,
     BACKGROUND_REMOVAL_FLOW,
     MAX_BATCH_SIZE,
 )
-from app.dependencies import get_photoroom_client
+from app.dependencies import get_redacted_service_client
 from app.models.background_remover import (
     BatchImageRequest,
     BatchImageResponse,
@@ -27,7 +27,9 @@ router = APIRouter(prefix="/api/v2", tags=["prefect-background-removal"])
 @router.post("/remove-backgrounds")
 async def start_batch_processing(
     request: BatchImageRequest,
-    photoroom_client: PhotoroomClient = Depends(get_photoroom_client),
+    redacted_service_client: RedactedServiceClient = Depends(
+        get_redacted_service_client
+    ),
 ) -> dict:
     """Start batch background removal using individual Prefect flows.
 
@@ -35,7 +37,7 @@ async def start_batch_processing(
 
     Args:
         request: BatchImageRequest containing multiple image URLs
-        photoroom_client: PhotoroomClient dependency
+        redacted_service_client: RedactedServiceClient dependency
 
     Returns:
         Dictionary containing flow_ids for tracking
@@ -53,8 +55,8 @@ async def start_batch_processing(
         )
 
     # Get API credentials
-    api_key = photoroom_client.api_key
-    api_url = photoroom_client.base_url
+    api_key = redacted_service_client.api_key
+    api_url = redacted_service_client.base_url
 
     # Start a flow for each image
     flow_ids = []

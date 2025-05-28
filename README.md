@@ -1,13 +1,14 @@
-# Background Remover Service
+<!-- filepath: [REDACTED] -->
+# [REDACTED] Service
 
-A high-performance FastAPI service that removes backgrounds from images using the Photoroom API. This service supports both single image processing and batch processing with parallel execution.
+A high-performance FastAPI service that performs [REDACTED_OPERATION] on digital assets using the [REDACTED] API. This service supports both single digital asset processing and batch processing with parallel execution.
 
 ## 🌟 Features
 
-- **Single Image Processing**: Remove background from individual images via URL
-- **Batch Processing**: Process multiple images in parallel with consolidated results
+- **Single Digital Asset Processing**: Perform [REDACTED_OPERATION] on individual digital assets via URL
+- **Batch Processing**: Process multiple digital assets in parallel with consolidated results
 - **High Performance**: Async/await architecture with parallel API calls
-- **S3 Storage Integration**: Processed images are stored in MinIO (S3-compatible storage)
+- **S3 Storage Integration**: Processed digital assets are stored in MinIO (S3-compatible storage)
 - **Production Ready**: Built with FastAPI, comprehensive error handling, and API documentation
 - **Workflow Orchestration**: Uses Prefect for reliable, scalable task execution
 - **Easy Setup**: Uses `uv` for fast dependency management
@@ -15,22 +16,22 @@ A high-performance FastAPI service that removes backgrounds from images using th
 ## 🏗️ Project Structure
 
 ```
-background-remover/
+[REDACTED]/
 ├── app/
 │   ├── main.py              # FastAPI application entry point
 │   ├── clients/
-│   │   └── photoroom.py     # Photoroom API client
+│   │   └── [REDACTED].py    # [REDACTED] API client
 │   ├── models/
-│   │   └── background_remover.py # Pydantic request/response models
+│   │   └── [REDACTED].py    # Pydantic request/response models
 │   └── routers/
-│       ├── background_remover.py  # Standard API endpoints
-│       └── background_remover_parallel.py  # Prefect-based API endpoints
+│       ├── [REDACTED].py    # Standard API endpoints
+│       └── [REDACTED]_parallel.py  # Prefect-based API endpoints
 ├── workflows/
 │   ├── clients/
-│   │   ├── photoroom.py     # Thin Photoroom client
+│   │   ├── [REDACTED].py    # Thin [REDACTED] client
 │   │   └── minio.py         # Thin MinIO client
 │   └── flows/
-│       └── background_remover.py  # Prefect workflow definition
+│       └── [REDACTED].py    # Prefect workflow definition
 ├── tests/                   # Test directory (pytest ready)
 ├── docker-compose.yaml      # Docker services including Prefect and MinIO
 ├── pyproject.toml           # Project configuration
@@ -47,7 +48,7 @@ background-remover/
 
 1. **Clone and navigate to the project:**
    ```bash
-   cd background-remover
+   cd [REDACTED]
    ```
 
 2. **Create virtual environment and install dependencies:**
@@ -60,8 +61,8 @@ background-remover/
 3. **Set up environment variables:**
    ```bash
    cp .env.example .env
-   # Edit .env and set your Photoroom API key:
-   # PHOTOROOM_API_KEY=your_actual_api_key_here
+   # Edit .env and set your [REDACTED] API key:
+   # [REDACTED]_API_KEY=your_actual_api_key_here
    ```
 
 4. **Start the service with Docker Compose:**
@@ -86,41 +87,28 @@ The MinIO console will be available at `http://localhost:9001` (login with minio
 - **GET** `/` - Service status
 - **GET** `/health` - Health check
 
-### Background Removal (Standard)
-- **POST** `/api/v1/remove-background` - Remove background from single image
-- **POST** `/api/v1/remove-backgrounds` - Batch process multiple images
+### [REDACTED] (Standard)
+- **POST** `/api/v1/[REDACTED_OPERATION]` - Perform [REDACTED_OPERATION] on single digital asset
+- **POST** `/api/v1/[REDACTED_OPERATIONS]` - Batch process multiple digital assets
 
-### Background Removal (Enhanced)
+### [REDACTED] (Enhanced)
 
-- **POST** `/api/v2/remove-backgrounds` - Start async batch processing with Prefect
-- **POST** `/api/v2/remove-backgrounds/results` - Get processing results, including partial results
+- **POST** `/api/v2/[REDACTED_OPERATIONS]` - Start async batch processing with Prefect
+- **POST** `/api/v2/[REDACTED_OPERATIONS]/results` - Get processing results, including partial results
 
 This implementation uses [Prefect 3.x](https://www.prefect.io/) for workflow orchestration and parallel task execution, 
 and MinIO as an S3-compatible storage solution. The architecture:
 
-1. **True Parallelism**: Uses Prefect workers to distribute image processing tasks across multiple workers
+1. **True Parallelism**: Uses Prefect workers to distribute [REDACTED_DIGITAL_ASSET_OPERATIONS] tasks across multiple workers
 2. **Durable Execution**: Leverages Prefect's built-in retry logic, error handling, and state persistence
-3. **S3 Storage**: Processed images are stored in MinIO (S3-compatible storage)
+3. **S3 Storage**: [REDACTED_PROCESSED] digital assets are stored in MinIO (S3-compatible storage)
 4. **Scalability**: Enables horizontal scaling by adding more Prefect workers
 
 **Key Workflow Components:**
-- **Single Flow Design**: Each image is processed by a separate Prefect flow for better isolation
-- **MinIO Integration**: Processed images are stored in MinIO with a unique URL for retrieval
+- **Single Flow Design**: Each digital asset is [REDACTED_PROCESSED] by a separate Prefect flow for better isolation
+- **MinIO Integration**: [REDACTED_PROCESSED] digital assets are stored in MinIO with a unique URL for retrieval
 - **Stateless API**: The API does not store state, making it easy to scale horizontally
 - **Partial Results**: The API returns partial results if some flows are still running
-
-**To use this feature:**
-
-Assuming you have already started all docker images with `docker compose`:
-
-```bash
-# Create a deployment for the background remover flow
-python -m workflows.flows.deploy serve
-
-# Access Prefect UI at http://localhost:4200
-# Access MinIO Console at http://localhost:9001 (login: minioadmin/minioadmin)
-# API endpoints available at /api/v2/*
-```
 
 ## 🔄 Prefect Workflows
 
@@ -143,39 +131,39 @@ The application uses Prefect for workflow orchestration. Here's how to work with
    - Through the API: Use the FastAPI endpoints at `/api/v2/*`
 
 4. **Viewing results:**
-   - Flow results are stored in MinIO and can be accessed via the URLs returned by the API
+   - Flow results are stored in MinIO and can be accessed via the URLs returned by the API (you might need to replace the dockerised address, "minio:9000" with "localhost:9001" to view the [REDACTED_PROCESSED] digital assets).
    - The Prefect UI provides detailed logs and execution history
 
 ## 🔧 Usage Examples
 
-### Single Image Processing
+### Single Digital Asset Processing
 ```bash
-curl -X POST "http://localhost:8000/api/v1/remove-background" \
+curl -X POST "http://localhost:8000/api/v1/[REDACTED_OPERATION]" \
   -H "Content-Type: application/json" \
-  -d '{"image_url": "https://example.com/your-image.jpg"}' \
-  --output processed_image.png
+  -d '{"digital_asset_url": "https://example.com/your-digital-asset.dat"}' \
+  --output processed_digital_asset.dat
 ```
 
 ### Batch Processing
 ```bash
-curl -X POST "http://localhost:8000/api/v1/remove-backgrounds" \
+curl -X POST "http://localhost:8000/api/v1/[REDACTED_OPERATIONS]" \
   -H "Content-Type: application/json" \
   -d '{
-    "image_urls": [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg"
+    "digital_asset_urls": [
+      "https://example.com/digital_asset1.dat",
+      "https://example.com/digital_asset2.dat"
     ]
   }'
 ```
 
 ### Truly Parallel Batch Processing with Prefect
 ```bash
-curl -X POST "http://localhost:8000/api/v2/remove-backgrounds" \
+curl -X POST "http://localhost:8000/api/v2/[REDACTED_OPERATIONS]" \
   -H "Content-Type: application/json" \
   -d '{
-    "image_urls": [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg"
+    "digital_asset_urls": [
+      "https://example.com/digital_asset1.dat",
+      "https://example.com/digital_asset2.dat"
     ]
   }'
 ```
@@ -189,16 +177,16 @@ The above curl will return the flow_ids to use to query for results. Example:
     "e8d64f58-69db-404c-8541-32c7c2110126",
     "fef9c3ac-033b-4f5e-9a22-3c579cf3e8f9"
   ],
-  "message": "Started processing 3 images",
+  "message": "Started processing 3 digital assets",
   "status": "RUNNING",
-  "image_count": 3
+  "digital_asset_count": 3
 }
 ```
 
 Then use the `/results` endpoint to get the actual results.
 
 ```bash
-curl -X POST "http://localhost:8000/api/v2/remove-backgrounds/results" \
+curl -X POST "http://localhost:8000/api/v2/[REDACTED_OPERATIONS]/results" \
   -H "Content-Type: application/json" \
   -d '{
     [

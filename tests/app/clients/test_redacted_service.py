@@ -1,11 +1,11 @@
-"""Tests for the PhotoroomClient."""
+"""Tests for the RedactedServiceClient."""
 
 import http
 
 import httpx
 import pytest
 
-from app.clients.photoroom import PhotoroomClient
+from app.clients.redacted_service import RedactedServiceClient
 from app.constants import SEGMENTATION_ENDPOINT
 
 # Module-level constants
@@ -15,8 +15,8 @@ TEST_URL = "https://example.com/test_image.jpg"
 
 
 def test_init():
-    """Test PhotoroomClient initialization."""
-    client = PhotoroomClient(api_key=API_KEY, api_url=API_URL)
+    """Test RedactedServiceClient initialization."""
+    client = RedactedServiceClient(api_key=API_KEY, api_url=API_URL)
     assert client.api_key == API_KEY
     assert client.base_url == API_URL
 
@@ -34,7 +34,7 @@ def test_remove_background_sync(mocker, test_image_data, processed_image_data):
 
     mocker.patch("httpx.Client", return_value=mock_client)
 
-    client = PhotoroomClient(api_key=API_KEY, api_url=API_URL)
+    client = RedactedServiceClient(api_key=API_KEY, api_url=API_URL)
     result = client.remove_background_sync(test_image_data)
 
     # Check result
@@ -63,7 +63,7 @@ def test_remove_background_sync_failure(mocker, test_image_data):
 
     mocker.patch("httpx.Client", return_value=mock_client)
 
-    client = PhotoroomClient(api_key=API_KEY, api_url=API_URL)
+    client = RedactedServiceClient(api_key=API_KEY, api_url=API_URL)
 
     # Should raise exception on error
     with pytest.raises(httpx.HTTPStatusError):
@@ -83,7 +83,7 @@ async def test_remove_background(mocker, test_image_data, processed_image_data):
 
     mocker.patch("httpx.AsyncClient", return_value=mock_client)
 
-    client = PhotoroomClient(api_key=API_KEY, api_url=API_URL)
+    client = RedactedServiceClient(api_key=API_KEY, api_url=API_URL)
     result = await client.remove_background(test_image_data)
 
     # Check result

@@ -2,16 +2,16 @@
 
 from fastapi import Request
 
-from app.clients.photoroom import PhotoroomClient
+from app.clients.redacted_service import RedactedServiceClient
 
 
-def get_photoroom_client(request: Request) -> PhotoroomClient:
-    """Get the PhotoroomClient singleton from app state.
+def get_redacted_service_client(request: Request) -> RedactedServiceClient:
+    """Get the RedactedServiceClient singleton from app state.
 
     Args:
         request: FastAPI request object containing app state
 
     Returns:
-        PhotoroomClient singleton instance
+        RedactedServiceClient singleton instance
     """
-    return request.app.state.photoroom_client
+    return request.app.state.redacted_service_client

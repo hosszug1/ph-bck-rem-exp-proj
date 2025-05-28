@@ -1,7 +1,7 @@
 [project]
 name = "background-remover"
 version = "0.1.0"
-description = "A FastAPI service for removing backgrounds from images using Photoroom API"
+description = "A FastAPI service for removing backgrounds from images using RedactedService API"
 readme = "README.md"
 authors = [{ name = "Anon", email = "anon@example.com" }]
 dependencies = [
