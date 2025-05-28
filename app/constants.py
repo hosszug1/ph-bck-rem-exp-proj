@@ -17,7 +17,7 @@ DEFAULT_IMAGE_NAME = "image"
 PNG_EXTENSION = ".png"
 SAFE_FILENAME_CHARS = "._-"
 
-# Photoroom Client Constants
+# RedactedService Client Constants
 IMAGE_FILE_PARAM = "image_file"
 SEGMENTATION_ENDPOINT = "segment"
 

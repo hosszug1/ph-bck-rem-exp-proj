@@ -30,8 +30,11 @@ def processed_image_data():
 
 
 @pytest.fixture
-def settings_override():
+def settings_override(monkeypatch):
     """Fixture providing settings override for testing."""
+    # Mock environment variables for testing
+    monkeypatch.setenv("REDACTED_SERVICE_API_KEY", "test_api_key")
+    monkeypatch.setenv("REDACTED_SERVICE_API_URL", "https://test.example.com")
     return Settings()
 
 
